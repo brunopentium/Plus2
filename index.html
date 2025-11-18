@@ -501,10 +501,10 @@
         </header>
         <form id="form-lancamento">
           <div class="type-selector">
-            <button type="button" class="tipo-btn active" data-tipo="entrada">Entrada</button>
-            <button type="button" class="tipo-btn" data-tipo="saida">Saída</button>
+            <button type="button" class="tipo-btn active" data-tipo="saida">Saída</button>
+            <button type="button" class="tipo-btn" data-tipo="entrada">Entrada</button>
           </div>
-          <input type="hidden" id="tipo-lancamento" value="entrada" />
+          <input type="hidden" id="tipo-lancamento" value="saida" />
           <div id="saida-presets" class="saida-presets hidden">
             <div class="saida-presets-title">Saídas</div>
             <div id="saida-presets-buttons" class="saida-presets-buttons"></div>
@@ -556,7 +556,7 @@
       renderSaidaPresets();
       bindEvents();
       descricaoPlaceholder = document.getElementById('descricao-lancamento').getAttribute('placeholder') || '';
-      alterarTipo('entrada');
+      alterarTipo('saida');
       restaurarSessao();
     });
 
@@ -887,7 +887,7 @@
         .withSuccessHandler(res => {
           atualizarStatus('form-status', res.mensagem, 'status-success');
           document.getElementById('form-lancamento').reset();
-          alterarTipo('entrada');
+          alterarTipo('saida');
           carregarLancamentos();
           carregarMeses();
           atualizarDashboard(document.getElementById('dashboard-mes').value);
