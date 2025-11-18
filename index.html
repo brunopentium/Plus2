@@ -329,6 +329,39 @@
       color: #fff;
     }
 
+    .saida-presets {
+      margin-bottom: 1rem;
+    }
+
+    .saida-presets-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+
+    .saida-presets-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .saida-btn {
+      background: #e6f0ff;
+      color: var(--primary-dark);
+      padding: 0.5rem 1.1rem;
+      border-radius: 999px;
+      border: 2px solid transparent;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .saida-btn.active {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: #fff;
+    }
+
     .readonly-warning {
       padding: 0.75rem 1rem;
       border-radius: 10px;
@@ -472,6 +505,10 @@
             <button type="button" class="tipo-btn" data-tipo="saida">Saída</button>
           </div>
           <input type="hidden" id="tipo-lancamento" value="entrada" />
+          <div id="saida-presets" class="saida-presets hidden">
+            <div class="saida-presets-title">Saídas</div>
+            <div id="saida-presets-buttons" class="saida-presets-buttons"></div>
+          </div>
           <div class="form-grid">
             <label>Data
               <input type="date" id="data-lancamento" required />
@@ -491,6 +528,18 @@
 
   <script>
     const STORAGE_KEY = 'pluspodcast.sessao';
+    const SAIDA_PRESETS = [
+      { label: 'Scallet', value: 'Scallet' },
+      { label: 'ADS', value: 'ADS' },
+      { label: 'Social Monster', value: 'Social Monster' },
+      { label: 'IA', value: 'IA' },
+      { label: 'Instagram', value: 'Instagram' },
+      { label: 'Studio', value: 'Studio' },
+      { label: 'Outro', value: '', custom: true }
+    ];
+    const SAIDA_AUTOFILL_PLACEHOLDER = 'Descrição preenchida automaticamente';
+    const SAIDA_CUSTOM_PLACEHOLDER = 'Descreva a saída';
+    let descricaoPlaceholder = '';
     const state = {
       session: null,
       meses: [],
@@ -499,11 +548,15 @@
         dataInicial: '',
         dataFinal: '',
         limite: 30
-      }
+      },
+      saidaPreset: null
     };
 
     document.addEventListener('DOMContentLoaded', () => {
+      renderSaidaPresets();
       bindEvents();
+      descricaoPlaceholder = document.getElementById('descricao-lancamento').getAttribute('placeholder') || '';
+      alterarTipo('entrada');
       restaurarSessao();
     });
 
@@ -514,8 +567,22 @@
       document.getElementById('filtros-form').addEventListener('submit', aplicarFiltros);
       document.getElementById('limpar-filtros').addEventListener('click', limparFiltros);
       document.getElementById('form-lancamento').addEventListener('submit', salvarLancamento);
-      document.querySelectorAll('.tipo-btn').forEach(btn => btn.addEventListener('click', selecionarTipo));
+      document.querySelectorAll('.tipo-btn').forEach(btn => btn.addEventListener('click', () => alterarTipo(btn.dataset.tipo)));
       document.getElementById('valor-lancamento').addEventListener('input', aplicarMascaraMoeda);
+    }
+
+    function renderSaidaPresets() {
+      const container = document.getElementById('saida-presets-buttons');
+      if (!container) return;
+      container.innerHTML = '';
+      SAIDA_PRESETS.forEach(preset => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'saida-btn';
+        btn.textContent = preset.label;
+        btn.addEventListener('click', () => selecionarSaidaPreset(preset));
+        container.appendChild(btn);
+      });
     }
 
     function restaurarSessao() {
@@ -746,10 +813,45 @@
         });
     }
 
-    function selecionarTipo(event) {
-      const tipo = event.currentTarget.dataset.tipo;
+    function alterarTipo(tipo) {
       document.getElementById('tipo-lancamento').value = tipo;
       document.querySelectorAll('.tipo-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tipo === tipo));
+      if (tipo === 'saida') {
+        document.getElementById('saida-presets').classList.remove('hidden');
+        if (state.saidaPreset) {
+          selecionarSaidaPreset(state.saidaPreset);
+        } else {
+          selecionarSaidaPreset(SAIDA_PRESETS[0]);
+        }
+      } else {
+        document.getElementById('saida-presets').classList.add('hidden');
+        state.saidaPreset = null;
+        document.querySelectorAll('#saida-presets-buttons .saida-btn').forEach(btn => btn.classList.remove('active'));
+        const descricaoInput = document.getElementById('descricao-lancamento');
+        descricaoInput.readOnly = false;
+        descricaoInput.placeholder = descricaoPlaceholder;
+        if (tipo === 'entrada') {
+          descricaoInput.value = '';
+        }
+      }
+    }
+
+    function selecionarSaidaPreset(preset) {
+      state.saidaPreset = preset;
+      document.querySelectorAll('#saida-presets-buttons .saida-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent === preset.label);
+      });
+      const descricaoInput = document.getElementById('descricao-lancamento');
+      if (preset.custom) {
+        descricaoInput.readOnly = false;
+        descricaoInput.value = '';
+        descricaoInput.placeholder = SAIDA_CUSTOM_PLACEHOLDER;
+        descricaoInput.focus();
+      } else {
+        descricaoInput.readOnly = true;
+        descricaoInput.value = preset.value;
+        descricaoInput.placeholder = SAIDA_AUTOFILL_PLACEHOLDER;
+      }
     }
 
     function aplicarMascaraMoeda(event) {
@@ -785,8 +887,7 @@
         .withSuccessHandler(res => {
           atualizarStatus('form-status', res.mensagem, 'status-success');
           document.getElementById('form-lancamento').reset();
-          document.getElementById('tipo-lancamento').value = 'entrada';
-          document.querySelectorAll('.tipo-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tipo === 'entrada'));
+          alterarTipo('entrada');
           carregarLancamentos();
           carregarMeses();
           atualizarDashboard(document.getElementById('dashboard-mes').value);
