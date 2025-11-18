@@ -556,6 +556,7 @@
       renderSaidaPresets();
       bindEvents();
       descricaoPlaceholder = document.getElementById('descricao-lancamento').getAttribute('placeholder') || '';
+      preencherDataAtual();
       alterarTipo('saida');
       restaurarSessao();
     });
@@ -569,6 +570,16 @@
       document.getElementById('form-lancamento').addEventListener('submit', salvarLancamento);
       document.querySelectorAll('.tipo-btn').forEach(btn => btn.addEventListener('click', () => alterarTipo(btn.dataset.tipo)));
       document.getElementById('valor-lancamento').addEventListener('input', aplicarMascaraMoeda);
+    }
+
+    function preencherDataAtual() {
+      const inputData = document.getElementById('data-lancamento');
+      if (!inputData) return;
+      const hoje = new Date();
+      const ano = hoje.getFullYear();
+      const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+      const dia = String(hoje.getDate()).padStart(2, '0');
+      inputData.value = `${ano}-${mes}-${dia}`;
     }
 
     function renderSaidaPresets() {
@@ -887,6 +898,7 @@
         .withSuccessHandler(res => {
           atualizarStatus('form-status', res.mensagem, 'status-success');
           document.getElementById('form-lancamento').reset();
+          preencherDataAtual();
           alterarTipo('saida');
           carregarLancamentos();
           carregarMeses();
