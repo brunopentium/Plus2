@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plus Podcast – Finanças</title>
+  <style>
+    :root {
+      --primary: #5c6ac4;
+      --primary-dark: #3f4c99;
+      --accent: #46c9a7;
+      --danger: #ff6b6b;
+      --bg: #f3f5ff;
+      --text: #1f2a44;
+      --muted: #7a819a;
+      --card-bg: #ffffff;
+      --entrada: #e8fff5;
+      --saida: #fff2f2;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    h1, h2, h3, h4 {
+      margin: 0;
+      font-weight: 600;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .container {
+      width: min(1200px, 95vw);
+      margin: 0 auto;
+      padding: 2rem 0 3rem;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 0;
+    }
+
+    .brand {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    .logout-btn {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      padding: 1.5rem;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(49, 69, 255, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .card h3 {
+      font-size: 0.95rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .card .value {
+      font-size: 2rem;
+      font-weight: 700;
+    }
+
+    .card.saldo .value {
+      color: var(--primary);
+    }
+
+    .card.entrada .value {
+      color: var(--accent);
+    }
+
+    .card.saida .value {
+      color: var(--danger);
+    }
+
+    .section {
+      margin-top: 2.5rem;
+      background: var(--card-bg);
+      padding: 1.75rem;
+      border-radius: 18px;
+      box-shadow: 0 15px 35px rgba(15, 23, 42, 0.08);
+    }
+
+    .section header {
+      padding: 0;
+      margin-bottom: 1rem;
+    }
+
+    .filters, .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: flex;
+      flex-direction: column;
+      font-size: 0.85rem;
+      color: var(--muted);
+      gap: 0.35rem;
+      font-weight: 600;
+    }
+
+    input, select, textarea {
+      padding: 0.7rem 0.9rem;
+      border-radius: 10px;
+      border: 1px solid #dfe3f6;
+      font-size: 1rem;
+      font-family: inherit;
+      background: #f9faff;
+      transition: border 0.2s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: #fff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+
+    thead {
+      background: #f1f4ff;
+    }
+
+    th, td {
+      padding: 0.9rem;
+      text-align: left;
+    }
+
+    th:nth-child(4), td:nth-child(4) {
+      text-align: right;
+    }
+
+    th:nth-child(3), td:nth-child(3) {
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #f0f0f5;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #fcfdff;
+    }
+
+    tbody tr.entrada {
+      background: var(--entrada);
+    }
+
+    tbody tr.saida {
+      background: var(--saida);
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.4rem;
+    }
+
+    .danger-btn {
+      background: var(--danger);
+      color: #fff;
+      padding: 0.45rem 0.9rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+    }
+
+    .primary-btn {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .secondary-btn {
+      background: #e7e9fb;
+      color: var(--primary-dark);
+    }
+
+    .status-bar {
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .status-bar.show {
+      display: block;
+    }
+
+    .status-info {
+      background: #eef2ff;
+      color: var(--primary-dark);
+    }
+
+    .status-success {
+      background: #e5fbf4;
+      color: #0a7c5d;
+    }
+
+    .status-error {
+      background: #ffecec;
+      color: #c53030;
+    }
+
+    .login-wrapper {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-card {
+      background: #fff;
+      padding: 2.5rem;
+      width: min(420px, 90vw);
+      border-radius: 24px;
+      box-shadow: 0 40px 60px rgba(28, 35, 74, 0.15);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .login-card h1 {
+      font-size: 1.8rem;
+    }
+
+    .login-card p {
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .login-card button {
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      background: #edf2ff;
+      color: var(--primary-dark);
+      padding: 0.2rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+    }
+
+    .type-selector {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .tipo-btn {
+      flex: 1;
+      border-radius: 12px;
+      padding: 0.8rem;
+      background: #e6e9ff;
+      color: var(--primary-dark);
+      border: 2px solid transparent;
+    }
+
+    .tipo-btn.active {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .readonly-warning {
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      background: #fff4d6;
+      color: #9c6b00;
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .section {
+        padding: 1.2rem;
+      }
+
+      .card .value {
+        font-size: 1.6rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="login-view" class="login-wrapper">
+    <form id="login-form" class="login-card">
+      <div>
+        <h1>Plus Podcast – Finanças</h1>
+        <p>Faça login para acessar o painel financeiro.</p>
+      </div>
+      <label>Usuário
+        <input type="text" id="login-usuario" autocomplete="username" required />
+      </label>
+      <label>Senha
+        <input type="password" id="login-senha" autocomplete="current-password" required />
+      </label>
+      <div id="login-status" class="status-bar status-info"></div>
+      <button type="submit" class="primary-btn">Entrar</button>
+    </form>
+  </div>
+
+  <div id="app-view" class="hidden">
+    <div class="container">
+      <header>
+        <div class="brand">Plus Podcast – Finanças</div>
+        <div class="user-info">
+          <span id="user-label">Logado como –</span>
+          <button id="logout-btn" class="logout-btn">Sair</button>
+        </div>
+      </header>
+
+      <section class="section">
+        <header>
+          <div>
+            <h2>Visão geral</h2>
+            <p class="tag" id="mes-selecionado">Mês atual</p>
+          </div>
+          <div>
+            <label>Selecionar mês
+              <select id="dashboard-mes"></select>
+            </label>
+          </div>
+        </header>
+        <div class="card-grid">
+          <div class="card saldo">
+            <h3>Saldo atual</h3>
+            <div class="value" id="saldo-atual">R$ 0,00</div>
+          </div>
+          <div class="card entrada">
+            <h3>Total de Entradas</h3>
+            <div class="value" id="total-entradas">R$ 0,00</div>
+          </div>
+          <div class="card saida">
+            <h3>Total de Saídas</h3>
+            <div class="value" id="total-saidas">R$ 0,00</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="secao-lancamentos">
+        <header>
+          <div>
+            <h2>Lançamentos recentes</h2>
+            <p class="tag" id="filtro-descricao">Últimos 30 dias</p>
+          </div>
+          <div id="filtro-feedback" class="status-bar status-info"></div>
+        </header>
+        <form id="filtros-form" class="filters">
+          <label>Mês
+            <select id="filtro-mes">
+              <option value="">Todos</option>
+            </select>
+          </label>
+          <label>Data inicial
+            <input type="date" id="filtro-data-inicial" />
+          </label>
+          <label>Data final
+            <input type="date" id="filtro-data-final" />
+          </label>
+          <label>Quantidade máxima
+            <input type="number" id="filtro-limite" min="1" max="200" value="30" />
+          </label>
+          <div style="display:flex; align-items:flex-end; gap:0.5rem;">
+            <button type="submit" class="primary-btn">Aplicar filtros</button>
+            <button type="button" id="limpar-filtros" class="secondary-btn">Limpar</button>
+          </div>
+        </form>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th>Descrição</th>
+                <th>Data</th>
+                <th>Valor</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="lista-lancamentos">
+              <tr>
+                <td colspan="5">Nenhum lançamento carregado.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section" id="secao-formulario">
+        <header>
+          <div>
+            <h2>Novo lançamento</h2>
+            <p id="perfil-aviso" class="readonly-warning hidden">Seu perfil é somente leitura. Cadastros desabilitados.</p>
+          </div>
+          <div id="form-status" class="status-bar status-info"></div>
+        </header>
+        <form id="form-lancamento">
+          <div class="type-selector">
+            <button type="button" class="tipo-btn active" data-tipo="entrada">Entrada</button>
+            <button type="button" class="tipo-btn" data-tipo="saida">Saída</button>
+          </div>
+          <input type="hidden" id="tipo-lancamento" value="entrada" />
+          <div class="form-grid">
+            <label>Data
+              <input type="date" id="data-lancamento" required />
+            </label>
+            <label>Descrição
+              <input type="text" id="descricao-lancamento" maxlength="120" placeholder="Ex.: Patrocínio" required />
+            </label>
+            <label>Valor
+              <input type="text" id="valor-lancamento" inputmode="decimal" placeholder="0,00" required />
+            </label>
+          </div>
+          <button type="submit" class="primary-btn">Salvar lançamento</button>
+        </form>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'pluspodcast.sessao';
+    const state = {
+      session: null,
+      meses: [],
+      filtros: {
+        mes: '',
+        dataInicial: '',
+        dataFinal: '',
+        limite: 30
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      bindEvents();
+      restaurarSessao();
+    });
+
+    function bindEvents() {
+      document.getElementById('login-form').addEventListener('submit', handleLogin);
+      document.getElementById('logout-btn').addEventListener('click', handleLogout);
+      document.getElementById('dashboard-mes').addEventListener('change', ({ target }) => atualizarDashboard(target.value));
+      document.getElementById('filtros-form').addEventListener('submit', aplicarFiltros);
+      document.getElementById('limpar-filtros').addEventListener('click', limparFiltros);
+      document.getElementById('form-lancamento').addEventListener('submit', salvarLancamento);
+      document.querySelectorAll('.tipo-btn').forEach(btn => btn.addEventListener('click', selecionarTipo));
+      document.getElementById('valor-lancamento').addEventListener('input', aplicarMascaraMoeda);
+    }
+
+    function restaurarSessao() {
+      const salvo = localStorage.getItem(STORAGE_KEY);
+      if (!salvo) {
+        mostrarLogin();
+        return;
+      }
+      const dados = JSON.parse(salvo);
+      if (!dados.token) {
+        mostrarLogin();
+        return;
+      }
+      google.script.run
+        .withSuccessHandler(res => {
+          if (res && res.valido) {
+            state.session = { token: dados.token, usuario: res.usuario, perfil: res.perfil };
+            mostrarApp();
+          } else {
+            limparSessaoLocal();
+            mostrarLogin();
+          }
+        })
+        .withFailureHandler(handleServerError)
+        .validarSessao(dados.token);
+    }
+
+    function handleLogin(event) {
+      event.preventDefault();
+      const usuario = document.getElementById('login-usuario').value.trim();
+      const senha = document.getElementById('login-senha').value;
+      if (!usuario || !senha) {
+        atualizarStatus('login-status', 'Preencha usuário e senha.', 'status-error');
+        return;
+      }
+      atualizarStatus('login-status', 'Validando credenciais...', 'status-info');
+      google.script.run
+        .withSuccessHandler(res => {
+          if (res.sucesso) {
+            state.session = { token: res.token, usuario: res.usuario, perfil: res.perfil };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({ token: res.token }));
+            mostrarApp();
+            atualizarStatus('login-status', 'Login realizado!', 'status-success');
+          }
+        })
+        .withFailureHandler(err => {
+          atualizarStatus('login-status', err && err.message ? err.message : 'Falha ao autenticar.', 'status-error');
+        })
+        .login({ usuario, senha });
+    }
+
+    function mostrarLogin() {
+      document.getElementById('login-view').classList.remove('hidden');
+      document.getElementById('app-view').classList.add('hidden');
+    }
+
+    function mostrarApp() {
+      document.getElementById('login-view').classList.add('hidden');
+      document.getElementById('app-view').classList.remove('hidden');
+      document.getElementById('user-label').textContent = `Logado como ${state.session.usuario} (${state.session.perfil})`;
+      atualizarFormPorPerfil();
+      carregarMeses();
+      atualizarDashboard();
+      carregarLancamentos();
+    }
+
+    function handleLogout() {
+      if (!state.session) return;
+      google.script.run.logout(state.session.token);
+      limparSessaoLocal();
+      mostrarLogin();
+    }
+
+    function limparSessaoLocal() {
+      localStorage.removeItem(STORAGE_KEY);
+      state.session = null;
+    }
+
+    function atualizarDashboard(mes) {
+      if (!state.session) return;
+      const payload = { token: state.session.token };
+      if (mes) payload.mes = mes;
+      google.script.run
+        .withSuccessHandler(res => {
+          document.getElementById('saldo-atual').textContent = res.formatado.saldoAtual;
+          document.getElementById('total-entradas').textContent = res.formatado.totalEntradas;
+          document.getElementById('total-saidas').textContent = res.formatado.totalSaidas;
+          document.getElementById('mes-selecionado').textContent = res.mesSelecionado;
+        })
+        .withFailureHandler(handleServerError)
+        .getDashboardData(payload);
+    }
+
+    function carregarMeses() {
+      if (!state.session) return;
+      google.script.run
+        .withSuccessHandler(lista => {
+          state.meses = lista;
+          popularSelectMeses('dashboard-mes', lista, true);
+          popularSelectMeses('filtro-mes', lista, false);
+        })
+        .withFailureHandler(handleServerError)
+        .getMesesDisponiveis({ token: state.session.token });
+    }
+
+    function popularSelectMeses(id, lista, incluirAtual) {
+      const select = document.getElementById(id);
+      const valorAnterior = select.value;
+      select.innerHTML = '';
+      if (!incluirAtual) {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'Todos';
+        select.appendChild(option);
+      } else {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'Mês atual';
+        select.appendChild(option);
+      }
+      lista.forEach(item => {
+        const option = document.createElement('option');
+        option.value = item.chave;
+        option.textContent = item.rotulo;
+        select.appendChild(option);
+      });
+      const possuiValorAnterior = lista.some(item => item.chave === valorAnterior);
+      select.value = possuiValorAnterior ? valorAnterior : '';
+    }
+
+    function aplicarFiltros(event) {
+      event.preventDefault();
+      state.filtros = {
+        mes: document.getElementById('filtro-mes').value,
+        dataInicial: document.getElementById('filtro-data-inicial').value,
+        dataFinal: document.getElementById('filtro-data-final').value,
+        limite: document.getElementById('filtro-limite').value
+      };
+      carregarLancamentos('Filtros aplicados.');
+    }
+
+    function limparFiltros() {
+      document.getElementById('filtro-mes').value = '';
+      document.getElementById('filtro-data-inicial').value = '';
+      document.getElementById('filtro-data-final').value = '';
+      document.getElementById('filtro-limite').value = 30;
+      state.filtros = { mes: '', dataInicial: '', dataFinal: '', limite: 30 };
+      carregarLancamentos('Filtros redefinidos.');
+    }
+
+    function carregarLancamentos(mensagem) {
+      if (!state.session) return;
+      if (mensagem) atualizarStatus('filtro-feedback', mensagem, 'status-info');
+      google.script.run
+        .withSuccessHandler(res => {
+          document.getElementById('filtro-descricao').textContent = res.filtrosAplicados;
+          renderizarTabela(res.lancamentos, res.perfil, res.usuario);
+          if (res.fallbackAplicado) {
+            atualizarStatus('filtro-feedback', 'Não encontramos dados no período informado. Exibindo lançamentos mais recentes.', 'status-info');
+          }
+        })
+        .withFailureHandler(handleServerError)
+        .getLancamentosRecentes({ token: state.session.token, filtros: state.filtros });
+    }
+
+    function renderizarTabela(lista, perfil, usuario) {
+      const tbody = document.getElementById('lista-lancamentos');
+      tbody.innerHTML = '';
+      if (!lista || lista.length === 0) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 5;
+        td.textContent = 'Nenhum lançamento encontrado.';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+      }
+      lista.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.classList.add(item.tipo);
+
+        const tdTipo = document.createElement('td');
+        tdTipo.textContent = item.tipo === 'entrada' ? 'Entrada' : 'Saída';
+
+        const tdDescricao = document.createElement('td');
+        tdDescricao.textContent = item.descricao;
+
+        const tdData = document.createElement('td');
+        tdData.textContent = item.dataFormatada;
+
+        const tdValor = document.createElement('td');
+        tdValor.textContent = item.valorFormatado;
+
+        const tdAcoes = document.createElement('td');
+        tdAcoes.className = 'actions';
+        if (usuario === 'bruno') {
+          const btn = document.createElement('button');
+          btn.className = 'danger-btn';
+          btn.textContent = 'Excluir';
+          btn.addEventListener('click', () => confirmarExclusao(item));
+          tdAcoes.appendChild(btn);
+        } else {
+          tdAcoes.textContent = '-';
+        }
+
+        tr.appendChild(tdTipo);
+        tr.appendChild(tdDescricao);
+        tr.appendChild(tdData);
+        tr.appendChild(tdValor);
+        tr.appendChild(tdAcoes);
+        tbody.appendChild(tr);
+      });
+    }
+
+    function confirmarExclusao(item) {
+      if (!confirm(`Excluir o lançamento "${item.descricao}"?`)) return;
+      google.script.run
+        .withSuccessHandler(res => {
+          atualizarStatus('filtro-feedback', res.mensagem, 'status-success');
+          carregarLancamentos();
+          carregarMeses();
+          atualizarDashboard(document.getElementById('dashboard-mes').value);
+        })
+        .withFailureHandler(handleServerError)
+        .deleteLancamentos({
+          token: state.session.token,
+          linhas: [{ tipo: item.tipo, linha: item.linha }]
+        });
+    }
+
+    function selecionarTipo(event) {
+      const tipo = event.currentTarget.dataset.tipo;
+      document.getElementById('tipo-lancamento').value = tipo;
+      document.querySelectorAll('.tipo-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tipo === tipo));
+    }
+
+    function aplicarMascaraMoeda(event) {
+      const input = event.target;
+      const somenteNumeros = input.value.replace(/[^0-9]/g, '');
+      const numero = parseFloat(somenteNumeros) / 100;
+      if (!isNaN(numero)) {
+        input.value = numero.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      } else {
+        input.value = '';
+      }
+    }
+
+    function salvarLancamento(event) {
+      event.preventDefault();
+      if (!state.session) return;
+      if (state.session.perfil === 'leitura') {
+        atualizarStatus('form-status', 'Seu perfil não permite cadastros.', 'status-error');
+        return;
+      }
+      const payload = {
+        tipo: document.getElementById('tipo-lancamento').value,
+        data: document.getElementById('data-lancamento').value,
+        descricao: document.getElementById('descricao-lancamento').value,
+        valor: document.getElementById('valor-lancamento').value
+      };
+      if (!payload.data || !payload.descricao || !payload.valor) {
+        atualizarStatus('form-status', 'Preencha todos os campos.', 'status-error');
+        return;
+      }
+      atualizarStatus('form-status', 'Salvando lançamento...', 'status-info');
+      google.script.run
+        .withSuccessHandler(res => {
+          atualizarStatus('form-status', res.mensagem, 'status-success');
+          document.getElementById('form-lancamento').reset();
+          document.getElementById('tipo-lancamento').value = 'entrada';
+          document.querySelectorAll('.tipo-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tipo === 'entrada'));
+          carregarLancamentos();
+          carregarMeses();
+          atualizarDashboard(document.getElementById('dashboard-mes').value);
+        })
+        .withFailureHandler(handleServerError)
+        .addLancamento({ token: state.session.token, lancamento: payload });
+    }
+
+    function atualizarFormPorPerfil() {
+      const somenteLeitura = state.session.perfil === 'leitura';
+      const formulario = document.getElementById('form-lancamento');
+      Array.from(formulario.elements).forEach(el => {
+        if (el.tagName === 'BUTTON') return;
+        el.disabled = somenteLeitura;
+      });
+      document.getElementById('perfil-aviso').classList.toggle('hidden', !somenteLeitura);
+    }
+
+    function atualizarStatus(id, mensagem, classeBase) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = mensagem;
+      el.className = `status-bar ${classeBase} show`;
+      if (!mensagem) {
+        el.classList.remove('show');
+      }
+    }
+
+    function handleServerError(err) {
+      const mensagem = err && err.message ? err.message : 'Erro inesperado. Tente novamente.';
+      atualizarStatus('filtro-feedback', mensagem, 'status-error');
+      atualizarStatus('form-status', mensagem, 'status-error');
+      if (mensagem.includes('Sessão expirada')) {
+        alert('Sua sessão expirou. Faça login novamente.');
+        limparSessaoLocal();
+        mostrarLogin();
+      }
+    }
+  </script>
+</body>
+</html>
